@@ -3,16 +3,17 @@ package ru.tcloud.vmaker
 import org.springframework.boot.CommandLineRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import ru.tcloud.vmaker.core.CommandReader
 
 @SpringBootApplication
-class VmakerApplication: CommandLineRunner {
+class VMakerApplication(private val commandReader: CommandReader): CommandLineRunner {
 
 	override fun run(vararg args: String?) {
-		TODO("Not yet implemented")
+		commandReader.run()
 	}
 
 }
 
 fun main(args: Array<String>) {
-	runApplication<VmakerApplication>(*args)
+	runApplication<VMakerApplication>(*args)
 }
