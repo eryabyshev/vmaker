@@ -8,6 +8,6 @@ interface Editor {
     fun encodeVideo(counter: Int, file: File): File
     fun concatenationMp4(workDir: File, list: List<File>): File
     fun doSilent(workDir: File, file: File, posfix: String = ""): File
-    fun concatenationMp3(workDir: File, list: List<File>): File
+    fun concatenationMp3(workDir: File, list: List<File>, tmpFiles: MutableSet<File>): File
     fun addAudioOnVideo(audio: File, video: File, resultDir: File): File
 }

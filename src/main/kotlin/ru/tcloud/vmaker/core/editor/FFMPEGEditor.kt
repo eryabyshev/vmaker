@@ -78,16 +78,16 @@ class FFMPEGEditor: Editor {
         return result
     }
 
-    override fun concatenationMp3(workDir: File, list: List<File>): File {
+    override fun concatenationMp3(workDir: File, list: List<File>, tmpFiles: MutableSet<File>): File {
         val mp3s = list.filter { it.extension.lowercase(Locale.getDefault()) == mp3 }
         val musicList = File("${workDir.absolutePath}/music_list.txt")
         musicList.createNewFile()
         if(!musicList.exists()) {
             throw VMakerException("Can't create ${musicList.absolutePath}")
         }
-        mp3s.mapNotNull { "${it.absolutePath}" }
+        mp3s.mapNotNull { "${it.name}" }
             .forEach {
-                musicList.appendText(it)
+                musicList.appendText("file '$it'")
                 musicList.appendText("\n")
             }
 
@@ -98,8 +98,10 @@ class FFMPEGEditor: Editor {
         }
 
         run("ffmpeg", listOf(
-            "-i", "concat", "-i", "-i", musicList.absolutePath, "-c", "copy", result.absolutePath, "-y"
+            "-f", "concat", "-i", musicList.absolutePath, "-c", "copy", result.absolutePath, "-y"
         ))
+        musicList.delete()
+        tmpFiles.add(result)
         return result
     }
 

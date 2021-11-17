@@ -47,7 +47,7 @@ class CreateFromDirCommand(private val editor: Editor) : Command {
             return
         }
         val workDirPath = args[Arguments.W.arg]?: throw VMakerException("You need set -w flag, use -help for more info")
-        var duration = (args[Arguments.D.arg]?: throw VMakerException("You need set -d flag, use -help for more info")).toInt()
+        var duration = (args[Arguments.D.arg]?: throw VMakerException("You need set -d flag, use -help for more info")).toInt() * 60
         val cleanTemp = args[Arguments.C.arg]?: true
         checkWorkDir(workDirPath)
         var workDir = File("${workDirPath.trim()}")
@@ -56,9 +56,10 @@ class CreateFromDirCommand(private val editor: Editor) : Command {
         val tmpFiles = mutableSetOf<File>()
         try {
             val audiFiles = fillAudioToFinallyResult(duration, musicDir)
-            val concatenationMp3 = if(audiFiles.size > 1) editor.concatenationMp3(musicDir, audiFiles) else audiFiles[0]
+            val concatenationMp3 = if(audiFiles.size > 1) editor.concatenationMp3(musicDir, audiFiles, tmpFiles) else audiFiles[0]
             duration = editor.getDuration(concatenationMp3)
             val prepareVideoToConcat = prepareVideoToConcat(workDirPath)
+                .onEach { (t, _) -> tmpFiles.add(t) }
             val concatVideo = if(prepareVideoToConcat.map { it.value.duration }.sum() >= duration.toLong()) {
                 prepareVideoToConcat.mapNotNull { it.value.tmpFiles?.codecFile }
             } else {
@@ -67,9 +68,6 @@ class CreateFromDirCommand(private val editor: Editor) : Command {
             val concatenation = editor.concatenationMp4(videoDir, concatVideo).apply { tmpFiles.add(this) }
             val silent = editor.doSilent(videoDir, concatenation).apply { tmpFiles.add(this) }
             editor.addAudioOnVideo(concatenationMp3, silent, workDir)
-
-
-
         } finally {
             tmpFiles.forEach { it.delete() }
         }
