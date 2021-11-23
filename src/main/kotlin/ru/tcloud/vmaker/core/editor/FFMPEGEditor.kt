@@ -3,6 +3,8 @@ package ru.tcloud.vmaker.core.editor
 import com.lordcodes.turtle.shellRun
 import org.springframework.stereotype.Component
 import ru.tcloud.vmaker.core.exception.VMakerException
+import ru.tcloud.vmaker.core.worker.VideoWorker
+import ru.tcloud.vmaker.core.worker.VideoWorker.VideoExtension.MP4
 import java.io.File
 import java.util.*
 
@@ -22,9 +24,8 @@ class FFMPEGEditor: Editor {
             }
     }
 
-    override fun makeFadeVideo(counter: Int, file: File, duration: Int): File {
-        println("Start fade video making for $counter video")
-        val fadeFile = File("${file.parentFile.absolutePath}/fade$counter.$mp4")
+    override fun makeFadeVideo(name: String, file: File, duration: Int): File {
+        val fadeFile = File("${file.parentFile.absolutePath}/fade_$name.$mp4")
         fadeFile.createNewFile()
         if(!fadeFile.exists()) {
             throw VMakerException("Can't create fade file")
@@ -34,13 +35,11 @@ class FFMPEGEditor: Editor {
             "fade=t=in:st=0:d=$fadeDuration,fade=t=out:st=$duration:d=$fadeDuration",
             "-c:a", "copy", fadeFile.absolutePath, "-y"
         ).apply { run("ffmpeg", this) }
-        println("Finish fade video making for $counter video")
         return fadeFile
     }
 
-    override fun encodeVideo(counter: Int, file: File): File {
-        println("Start codec video making for $counter video")
-        val tsVideo = File("${file.parentFile.absolutePath}/tmp$counter.$ts")
+    override fun encodeVideo(name: String, file: File): File {
+        val tsVideo = File("${file.parentFile.absolutePath}/encode_$name.$ts")
         tsVideo.createNewFile()
         if(!tsVideo.exists()) {
             throw VMakerException("Can't create codec file")
@@ -49,7 +48,17 @@ class FFMPEGEditor: Editor {
             "-i", file.absolutePath, "-c", "copy", "-bsf:v", "h264_mp4toannexb",
             "-f", "mpegts", tsVideo.absolutePath, "-y"
         ).apply { run("ffmpeg", this) }
-        println("Finish codec video making for $counter video")
+        return tsVideo
+    }
+
+    override fun encodeVideoFromImage(name: String, file:File): File {
+        val tsVideo = File("${file.parentFile.absolutePath}/encode_$name.$ts")
+        tsVideo.createNewFile()
+        if(!tsVideo.exists()) {
+            throw VMakerException("Can't create codec file")
+        }
+        listOf("-i", file.absolutePath, "-f", "mpegts", tsVideo.absolutePath, "-y")
+            .apply { run("ffmpeg", this) }
         return tsVideo
     }
 
@@ -59,9 +68,14 @@ class FFMPEGEditor: Editor {
         if(!result.exists()) {
             throw VMakerException("Can't create ${result.absolutePath}")
         }
+        val fileList = File("${workDir.absolutePath}/video_list.txt")
+        list.mapNotNull { "${it.absolutePath}" }
+            .forEach {
+                fileList.appendText("file '$it'")
+                fileList.appendText("\n")
+            }
         run("ffmpeg", listOf(
-            "-i", "concat:${list.joinToString("|")}", "-c", "copy",
-            "-bsf:a", "aac_adtstoasc", result.absolutePath, "-y"
+            "-f", "concat", "-safe", "0", "-i", fileList.absolutePath, "-c", "copy", "-bsf:a", "aac_adtstoasc", result.absolutePath, "-y"
         ))
         return result
     }
@@ -78,7 +92,7 @@ class FFMPEGEditor: Editor {
         return result
     }
 
-    override fun concatenationMp3(workDir: File, list: List<File>, tmpFiles: MutableSet<File>): File {
+    override fun concatenationMp3(workDir: File, list: List<File>): File {
         val mp3s = list.filter { it.extension.lowercase(Locale.getDefault()) == mp3 }
         val musicList = File("${workDir.absolutePath}/music_list.txt")
         musicList.createNewFile()
@@ -101,7 +115,6 @@ class FFMPEGEditor: Editor {
             "-f", "concat", "-i", musicList.absolutePath, "-c", "copy", result.absolutePath, "-y"
         ))
         musicList.delete()
-        tmpFiles.add(result)
         return result
     }
 
@@ -118,6 +131,26 @@ class FFMPEGEditor: Editor {
         return result
     }
 
+    override fun imageToVideo(file: File, name: String, duration: Int): File {
+        val result = File("${file.parentFile.absolutePath}/$name.${MP4.ex}")
+        result.createNewFile()
+        if(!result.exists()) {
+            throw VMakerException("Can't create ${result.absolutePath}")
+        }
+        run("ffmpeg", listOf(
+            "-r", "1/$duration", "-i", file.absolutePath, "-c:v", "png", "-vf", "fps=25", "-pix_fmt", "yuv420p",
+            result.absolutePath, "-y"
+        ))
+        return result
+    }
+
+    override fun jpegToPng(file: File): File {
+        if(file.extension == "png") {
+            return file
+        }
+        run("mogrify", listOf("-format", "png", file.absolutePath))
+        return File("${file.parentFile}/${file.nameWithoutExtension}.png")
+    }
 
     private fun run(cmd: String, args: List<String>): String {
         println("$cmd ${args.joinToString(" ")}")
