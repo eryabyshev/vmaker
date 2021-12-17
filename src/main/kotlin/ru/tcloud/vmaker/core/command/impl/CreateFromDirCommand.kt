@@ -1,7 +1,7 @@
 package ru.tcloud.vmaker.core.command.impl
 
 import org.springframework.stereotype.Service
-import ru.tcloud.vmaker.core.DirStructure
+import ru.tcloud.vmaker.core.MediaType
 import ru.tcloud.vmaker.core.command.Command
 import ru.tcloud.vmaker.core.command.CommandType
 import ru.tcloud.vmaker.core.command.impl.CreateFromDirCommand.Arguments.*
@@ -26,9 +26,9 @@ class CreateFromDirCommand(
     private enum class Arguments(val arg: String, val desc: String) {
         W(
             "w", """work dir, have to follow next rule workDir
-            |                                                   - ${DirStructure.VIDEO.name.lowercase(Locale.getDefault())}
-            |                                                   - ${DirStructure.AUDIO.name.lowercase(Locale.getDefault())}
-            |                                                   - ${DirStructure.IMAGE.name.lowercase(Locale.getDefault())}
+            |                                                   - ${MediaType.VIDEO.name.lowercase(Locale.getDefault())}
+            |                                                   - ${MediaType.AUDIO.name.lowercase(Locale.getDefault())}
+            |                                                   - ${MediaType.IMAGE.name.lowercase(Locale.getDefault())}
         """.trimMargin()
         ),
         D("d", "video have to be duration in min"),
@@ -44,9 +44,9 @@ class CreateFromDirCommand(
         )
     }
 
-    private val videoDirName = DirStructure.VIDEO.name.lowercase(Locale.getDefault())
-    private val musicDirName = DirStructure.AUDIO.name.lowercase(Locale.getDefault())
-    private val pictureDirName = DirStructure.IMAGE.name.lowercase(Locale.getDefault())
+    private val videoDirName = MediaType.VIDEO.name.lowercase(Locale.getDefault())
+    private val musicDirName = MediaType.AUDIO.name.lowercase(Locale.getDefault())
+    private val pictureDirName = MediaType.IMAGE.name.lowercase(Locale.getDefault())
     private val dirStructure = setOf(videoDirName, musicDirName)
 
     override fun getType() = CommandType.CREATE_FROM_DIR

@@ -1,5 +1,5 @@
 package ru.tcloud.vmaker.core
 
-enum class DirStructure {
+enum class MediaType {
     VIDEO, AUDIO, IMAGE
 }
