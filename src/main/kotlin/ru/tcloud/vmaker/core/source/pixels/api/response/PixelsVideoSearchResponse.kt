@@ -2,7 +2,7 @@ package ru.tcloud.vmaker.core.source.pixels.api.response
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class VideoSearchResponse (
+data class PixelsVideoSearchResponse (
 	val page : Int,
 	@JsonProperty("per_page")
 	val perPage : Int,

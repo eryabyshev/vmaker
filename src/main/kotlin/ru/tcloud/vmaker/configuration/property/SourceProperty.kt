@@ -10,10 +10,11 @@ import org.springframework.validation.annotation.Validated
 data class SourceProperty(
     val pixels: Property,
     val pixabay: Property,
+    val searchTry: Int
 ) {
     data class Property(
         val authorizationToken: String,
         val videoResource: String,
-        val audioResource: String
+        val audioResource: String,
     )
 }

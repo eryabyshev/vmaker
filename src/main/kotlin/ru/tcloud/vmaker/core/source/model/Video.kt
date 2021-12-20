@@ -13,5 +13,6 @@ data class Video(
     val id: String,
     val src: MediaSource,
     val usageDate: Instant,
-    val downLoadId: Long
+    val downLoadUrl: String,
+    val author: String
 )
