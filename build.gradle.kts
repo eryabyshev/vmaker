@@ -26,6 +26,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.core:jackson-databind:2.13.0")
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive:2.6.0")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.5.2")
+	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
 }
 
 tasks.withType<KotlinCompile> {

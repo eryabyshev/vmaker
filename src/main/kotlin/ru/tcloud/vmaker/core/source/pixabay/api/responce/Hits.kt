@@ -1,8 +1,9 @@
 package ru.tcloud.vmaker.core.source.pixabay.api.responce
 
+import com.fasterxml.jackson.annotation.JsonCreator
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class Hits (
+data class Hits @JsonCreator constructor (
 
 	val id : Long,
 	val pageURL : String,

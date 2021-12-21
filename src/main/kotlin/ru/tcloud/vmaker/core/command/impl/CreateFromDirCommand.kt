@@ -1,6 +1,6 @@
 package ru.tcloud.vmaker.core.command.impl
 
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import ru.tcloud.vmaker.core.MediaType
 import ru.tcloud.vmaker.core.command.Command
 import ru.tcloud.vmaker.core.command.CommandType
@@ -16,7 +16,7 @@ import java.util.*
 
 //cfd -w /home/evgeny/Documents/Chillax/video1 -d 30
 
-@Service
+@Component
 class CreateFromDirCommand(
     private val videoWorker: VideoWorker,
     private val audioWorker: AudioWorker,
@@ -26,9 +26,9 @@ class CreateFromDirCommand(
     private enum class Arguments(val arg: String, val desc: String) {
         W(
             "w", """work dir, have to follow next rule workDir
-            |                                                   - ${MediaType.VIDEO.name.lowercase(Locale.getDefault())}
-            |                                                   - ${MediaType.AUDIO.name.lowercase(Locale.getDefault())}
-            |                                                   - ${MediaType.IMAGE.name.lowercase(Locale.getDefault())}
+            - ${MediaType.VIDEO.name.lowercase(Locale.getDefault())}
+            - ${MediaType.AUDIO.name.lowercase(Locale.getDefault())}
+            - ${MediaType.IMAGE.name.lowercase(Locale.getDefault())}
         """.trimMargin()
         ),
         D("d", "video have to be duration in min"),
@@ -43,11 +43,6 @@ class CreateFromDirCommand(
                 .trimMargin()
         )
     }
-
-    private val videoDirName = MediaType.VIDEO.name.lowercase(Locale.getDefault())
-    private val musicDirName = MediaType.AUDIO.name.lowercase(Locale.getDefault())
-    private val pictureDirName = MediaType.IMAGE.name.lowercase(Locale.getDefault())
-    private val dirStructure = setOf(videoDirName, musicDirName)
 
     override fun getType() = CommandType.CREATE_FROM_DIR
 
@@ -139,6 +134,10 @@ class CreateFromDirCommand(
     companion object {
         internal const val pictureToVideoDefaultDuration = 30
         internal const val cleanAfterDefaultValue = false
+        private val videoDirName = MediaType.VIDEO.name.lowercase(Locale.getDefault())
+        private val musicDirName = MediaType.AUDIO.name.lowercase(Locale.getDefault())
+        private val pictureDirName = MediaType.IMAGE.name.lowercase(Locale.getDefault())
+        private val dirStructure = setOf(videoDirName, musicDirName)
     }
 
 }

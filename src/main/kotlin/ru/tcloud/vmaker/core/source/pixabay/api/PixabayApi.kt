@@ -14,22 +14,25 @@ import ru.tcloud.vmaker.core.source.MediaSource.PIXABAY
 import ru.tcloud.vmaker.core.source.Resource
 import ru.tcloud.vmaker.core.source.model.Video
 import ru.tcloud.vmaker.core.source.pixabay.api.responce.PixabayVideoSearchResponse
-import ru.tcloud.vmaker.core.source.pixels.api.PixelsApi
 import java.nio.file.Paths
-import java.time.Instant
+import java.util.*
 import java.util.Locale.getDefault
 
 @Component
 class PixabayApi(
     private val okHttpClient: OkHttpClient,
-    private val sourceProperty: SourceProperty
+    private val sourceProperty: SourceProperty,
+    private val mapper: ObjectMapper,
 ): Resource {
 
     override suspend fun searchVideo(page: Int, vararg tags: String) = coroutineScope<List<Video>> {
-        val httpUrl = "${sourceProperty.pixabay.videoResource}${PixelsApi.searchPath}?key=${sourceProperty.pixabay.authorizationToken}&q=${tags.joinToString("+")}&page=$page&per_page=200"
+        val httpUrl = "${sourceProperty.pixabay.videoResource}?key=${sourceProperty.pixabay.authorizationToken}&q=${tags.joinToString("+")}&page=$page&per_page=200"
             .toHttpUrl()
-        mapper.readValue(get(httpUrl).toString(), PixabayVideoSearchResponse::class.java).hits.map {
-            Video(it.id.toString(), PIXABAY, Instant.now(), it.videos.large.url, it.user)
+
+        get(httpUrl).use {res ->
+            mapper.readValue(res.string(), PixabayVideoSearchResponse::class.java).hits.map {
+                Video(it.id.toString(), PIXABAY, Date(), it.videos.large.url, it.user)
+            }
         }
     }
 
@@ -37,8 +40,10 @@ class PixabayApi(
         val httpUrl = video.downLoadUrl.toHttpUrl()
         val file = Paths.get(path, "${PIXABAY.name.lowercase(getDefault())}_${video.id}.mp4").toFile()
             .apply { this.createNewFile() }
-        file.writeBytes(get(httpUrl).bytes())
-        file.absolutePath
+        get(httpUrl).use {
+            file.writeBytes(it.bytes())
+            file.absolutePath
+        }
     }
 
     private fun get(httpUrl: HttpUrl): ResponseBody {
@@ -51,9 +56,5 @@ class PixabayApi(
             throw VMakerException("Request to $httpUrl finish with error!")
         }
         return response.body!!
-    }
-
-    companion object {
-        val mapper = ObjectMapper()
     }
 }

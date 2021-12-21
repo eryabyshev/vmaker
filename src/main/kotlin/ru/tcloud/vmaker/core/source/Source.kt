@@ -9,5 +9,5 @@ interface Source {
 
     suspend fun findAudio(path: String, vararg tags: String)
 
-    suspend fun getSourceType(): MediaSource
+    fun getSourceType(): MediaSource
 }

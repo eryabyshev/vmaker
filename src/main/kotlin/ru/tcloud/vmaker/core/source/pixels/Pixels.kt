@@ -40,5 +40,5 @@ class Pixels(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getSourceType() = MediaSource.PEXELS
+    override fun getSourceType() = MediaSource.PEXELS
 }

@@ -21,7 +21,9 @@ class Pixabay(
         while (page <= sourceProperty.searchTry) {
             val findVideo = pixabay.searchVideo(page, *tags)
             val alreadyUseId = videoRepository.getAlreadyUseId(findVideo.map { it.id }, getSourceType())
-            video = findVideo.filter { !alreadyUseId.contains(it.id) }.firstOrNull()
+            video = findVideo.filter {
+                it.downLoadUrl.isNotBlank() && !alreadyUseId.contains(it.id)
+            }.firstOrNull()
             if(video != null) {
                 break
             }
@@ -39,5 +41,5 @@ class Pixabay(
         TODO("Not yet implemented")
     }
 
-    override suspend fun getSourceType() = MediaSource.PIXABAY
+    override fun getSourceType() = MediaSource.PIXABAY
 }

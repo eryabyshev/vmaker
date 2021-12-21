@@ -4,7 +4,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.mongodb.core.mapping.Document
 import org.springframework.data.mongodb.core.mapping.Field
 import ru.tcloud.vmaker.core.source.MediaSource
-import java.time.Instant
+import java.util.*
 
 @Document
 data class Video(
@@ -12,7 +12,7 @@ data class Video(
     @Field("_id")
     val id: String,
     val src: MediaSource,
-    val usageDate: Instant,
+    val usageDate: Date,
     val downLoadUrl: String,
     val author: String
 )

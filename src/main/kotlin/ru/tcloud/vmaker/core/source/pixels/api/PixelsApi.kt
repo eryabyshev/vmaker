@@ -15,32 +15,38 @@ import ru.tcloud.vmaker.core.source.Resource
 import ru.tcloud.vmaker.core.source.model.Video
 import ru.tcloud.vmaker.core.source.pixels.api.response.PixelsVideoSearchResponse
 import java.nio.file.Paths
-import java.time.Instant
+import java.util.*
 import java.util.Locale.getDefault
 
 @Component
 class PixelsApi(
     private val okHttpClient: OkHttpClient,
-    private val sourceProperty: SourceProperty
-): Resource {
+    private val sourceProperty: SourceProperty,
+    private val mapper: ObjectMapper,
+) : Resource {
 
     override suspend fun searchVideo(page: Int, vararg tags: String) = coroutineScope {
-        val httpUrl = "${sourceProperty.pixels.videoResource}$searchPath?query=${tags.joinToString(",")}&page=$page&per_page=85"
-            .toHttpUrl()
+        val httpUrl =
+            "${sourceProperty.pixels.videoResource}$searchPath?query=${tags.joinToString(",")}&page=$page&per_page=85"
+                .toHttpUrl()
 
-        mapper.readValue(get(httpUrl).toString(), PixelsVideoSearchResponse::class.java)
-            .videos.map {
-                val downLoadUrl = "${sourceProperty.pixels.videoResource}/videos/${it.videoFiles.last().id}"
-                Video(it.id.toString(), PEXELS, Instant.now(), downLoadUrl, it.user.name)
-            }
+        get(httpUrl).use { res ->
+            mapper.readValue(res.string(), PixelsVideoSearchResponse::class.java)
+                .videos.map {
+                    Video(it.id.toString(), PEXELS, Date(),
+                        it.videoFiles.maxByOrNull { f -> f.height }!!.link, it.user.name)
+                }
+        }
     }
 
     override suspend fun downLoadVideo(video: Video, path: String) = coroutineScope<String> {
         val httpUrl = video.downLoadUrl.toHttpUrl()
         val file = Paths.get(path, "${PEXELS.name.lowercase(getDefault())}_${video.id}.mp4").toFile()
             .apply { this.createNewFile() }
-        file.writeBytes(get(httpUrl).bytes())
-        file.absolutePath
+        get(httpUrl).use {
+            file.writeBytes(it.bytes())
+            file.absolutePath
+        }
     }
 
     private fun get(httpUrl: HttpUrl): ResponseBody {
@@ -50,7 +56,7 @@ class PixelsApi(
                 .build()
                 .let { okHttpClient.newCall(it) }
                 .execute()
-        if(!response.isSuccessful || response.body == null) {
+        if (!response.isSuccessful || response.body == null) {
             throw VMakerException("Request to $httpUrl finish with error!")
         }
         return response.body!!
@@ -59,7 +65,6 @@ class PixelsApi(
 
     companion object {
         const val searchPath = "/search"
-        val mapper = ObjectMapper()
     }
 
 }
