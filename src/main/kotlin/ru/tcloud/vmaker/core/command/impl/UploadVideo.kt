@@ -50,7 +50,9 @@ class UploadVideo(sources: List<Source>): Command {
 
         runBlocking {
             repeat(counter) {
-                sourcesRouter[src.next()]?.findVideo(path, *tags.toTypedArray())
+                val next = src.next()
+                sourcesRouter[next]?.findVideo(path, *tags.toTypedArray())
+                    .apply { println("In source ${next.name} was not found proper video") }
             }
         }
     }

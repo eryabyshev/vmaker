@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import ru.tcloud.vmaker.core.CommandReader
 
+
 @SpringBootApplication
 class VMakerApplication(private val commandReader: CommandReader): CommandLineRunner {
 

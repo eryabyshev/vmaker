@@ -6,7 +6,7 @@ source:
   pixabay:
     authorization-token: ${PIXABAY_AUTH}
     video-resource: https://pixabay.com/api/videos
-    audio-resource:
+    audio-resource: https://pixabay.com/music/search/mood/relaxing/
   search-try: ${VIDEO_SEARCH_TRY:50}
 
 spring:

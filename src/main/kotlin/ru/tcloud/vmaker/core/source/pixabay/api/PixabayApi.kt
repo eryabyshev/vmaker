@@ -31,7 +31,7 @@ class PixabayApi(
 
         get(httpUrl).use {res ->
             mapper.readValue(res.string(), PixabayVideoSearchResponse::class.java).hits.map {
-                Video(it.id.toString(), PIXABAY, Date(), it.videos.large.url, it.user)
+                Video(it.id.toString(), PIXABAY, null, it.videos.large.url, it.user)
             }
         }
     }

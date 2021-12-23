@@ -12,7 +12,7 @@ data class Video(
     @Field("_id")
     val id: String,
     val src: MediaSource,
-    val usageDate: Date,
+    var usageDate: Date? = null,
     val downLoadUrl: String,
     val author: String
 )

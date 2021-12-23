@@ -27,6 +27,8 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-mongodb-reactive:2.6.0")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactive:1.5.2")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.13.0")
+	implementation("org.seleniumhq.selenium:selenium-java:3.14.0")
+	implementation("org.seleniumhq.selenium:selenium-chrome-driver:3.14.0")
 }
 
 tasks.withType<KotlinCompile> {
